@@ -33,6 +33,11 @@ func Test_execute(t *testing.T) {
 			ctx:  context.Background(),
 			args: []string{"status", "qwe"},
 		},
+		{
+			name: "systemctl daemon-reload --user",
+			ctx:  context.Background(),
+			args: []string{"daemon-reload", "--user"},
+		},
 	}
 
 	for _, tt := range tests {

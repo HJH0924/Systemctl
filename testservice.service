@@ -1,0 +1,12 @@
+[Unit]
+Description=Test Service for Systemctl Library
+After=network.target
+
+[Service]
+Type=simple
+# Continuously runs, printing a message every 10 seconds
+ExecStart=/bin/bash -c "while true; do sleep 10; echo 'Still running'; done"
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

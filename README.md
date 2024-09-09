@@ -63,3 +63,28 @@
 
 
 
+## 运行测试
+
+运行测试用例之前，您需要在您的系统上安装 `testservice.service`
+
+```shell
+sudo cp Systemctl/testservice.service /etc/systemd/system
+sudo systemctl daemon-reload
+```
+
+
+
+为了全面测试这个库，您需要以root用户和普通用户身份运行测试，因为`systemctl`可能需要root权限来执行某些操作。以下是一些建议：
+
+1.  **以root用户身份运行测试**：某些测试可能需要root权限，例如启用或禁用服务。
+
+    ```shell
+    sudo su root # 切换 root 用户
+    /usr/local/go/bin/go test -run TestDaemonReload # 以 root 身份运行 TestDaemonReload 测试用例
+    ```
+
+2.  **以普通用户身份运行测试**：其他测试应该以普通用户身份运行，以确保库在没有提升权限的情况下也能正常工作。
+
+    ```shell
+    go test -run TestDaemonReload
+    ```
