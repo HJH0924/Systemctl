@@ -17,10 +17,15 @@ import (
 	"strings"
 )
 
-var systemctl string
+type Systemctl struct {
+	systemctl string
+}
 
-func init() {
-	systemctl, _ = exec.LookPath("systemctl")
+func NewSystemctl() *Systemctl {
+	systemctl, _ := exec.LookPath("systemctl")
+	return &Systemctl{
+		systemctl: systemctl,
+	}
 }
 
 type Result struct {
@@ -37,7 +42,7 @@ func (Self *Result) Print() {
 	fmt.Printf("Err: %v\n", Self.Err)
 }
 
-func execute(ctx context.Context, args []string) Result {
+func (Self *Systemctl) Execute(ctx context.Context, args []string) Result {
 	var (
 		stdout   bytes.Buffer
 		stderr   bytes.Buffer
@@ -47,14 +52,14 @@ func execute(ctx context.Context, args []string) Result {
 		err      error
 	)
 
-	if systemctl == "" {
+	if Self.systemctl == "" {
 		return Result{
 			Code: 1,
 			Err:  ErrNotInstalled,
 		}
 	}
 
-	cmd := exec.CommandContext(ctx, systemctl, args...)
+	cmd := exec.CommandContext(ctx, Self.systemctl, args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 

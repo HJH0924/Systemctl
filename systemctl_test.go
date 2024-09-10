@@ -91,7 +91,7 @@ func TestDaemonReload(t *testing.T) {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
-			res := DaemonReload(ctx, tt.opts)
+			res := NewSystemctl().DaemonReload(ctx, tt.opts)
 			res.Print()
 		})
 	}
@@ -118,7 +118,7 @@ func TestDisable(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 
-			res := Disable(ctx, tt.unit, Options{Mode: ROOT})
+			res := NewSystemctl().Disable(ctx, tt.unit, Options{Mode: ROOT})
 			res.Print()
 		})
 	}
@@ -145,7 +145,7 @@ func TestEnable(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 
-			res := Enable(ctx, tt.unit, Options{Mode: ROOT})
+			res := NewSystemctl().Enable(ctx, tt.unit, Options{Mode: ROOT})
 			res.Print()
 		})
 	}
@@ -172,7 +172,7 @@ func TestReEnable(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 
-			res := ReEnable(ctx, tt.unit, Options{Mode: ROOT})
+			res := NewSystemctl().ReEnable(ctx, tt.unit, Options{Mode: ROOT})
 			res.Print()
 		})
 	}

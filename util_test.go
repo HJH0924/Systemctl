@@ -42,7 +42,8 @@ func Test_execute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res := execute(tt.ctx, tt.args)
+			systemctl := NewSystemctl()
+			res := systemctl.Execute(tt.ctx, tt.args)
 			if debug {
 				fmt.Printf("stdout: %s\n", res.Output)
 				fmt.Printf("stderr: %s\n", res.Warnings)
