@@ -1,3 +1,4 @@
+[![PkgGoDev](https://pkg.go.dev/github.com/HJH0924/Systemctl)](https://pkg.go.dev/github.com/HJH0924/Systemctl)
 # Systemctl
 
 这个库旨在为 Go 开发人员提供符合习惯的 `systemctl` 绑定，以便更容易地使用 Go 语言编写系统工具。这个工具试图通过为 `systemctl` 提供结构化、经过彻底测试的包装器，来消除随意使用 shell 执行 `systemctl` 命令的猜测工作。
