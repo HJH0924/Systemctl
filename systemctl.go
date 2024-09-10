@@ -66,3 +66,11 @@ func (Self *Systemctl) ReEnable(ctx context.Context, unit string, opts Options) 
 	}
 	return Self.Execute(ctx, args)
 }
+
+func (Self *Systemctl) IsActive(ctx context.Context, unit string, opts Options) Result {
+	args := []string{"is-active", "--system", unit}
+	if opts.Mode == USER {
+		args[1] = "--user"
+	}
+	return Self.Execute(ctx, args)
+}

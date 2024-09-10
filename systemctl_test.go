@@ -49,7 +49,7 @@ const (
 	UserSkipTest = "skipping superuser test while running as user"
 )
 
-func TestDaemonReload(t *testing.T) {
+func TestSystemctl_DaemonReload(t *testing.T) {
 	tests := []struct {
 		name  string
 		opts  Options
@@ -98,7 +98,7 @@ func TestDaemonReload(t *testing.T) {
 }
 
 /* Run these tests only as a superuser */
-func TestDisable(t *testing.T) {
+func TestSystemctl_Disable(t *testing.T) {
 	tests := []struct {
 		name string
 		unit string
@@ -125,7 +125,7 @@ func TestDisable(t *testing.T) {
 }
 
 /* Run these tests only as a superuser */
-func TestEnable(t *testing.T) {
+func TestSystemctl_Enable(t *testing.T) {
 	tests := []struct {
 		name string
 		unit string
@@ -152,13 +152,13 @@ func TestEnable(t *testing.T) {
 }
 
 /* Run these tests only as a superuser */
-func TestReEnable(t *testing.T) {
+func TestSystemctl_ReEnable(t *testing.T) {
 	tests := []struct {
 		name string
 		unit string
 	}{
 		{
-			name: "systemctl enable --system testservice",
+			name: "systemctl reenable --system testservice",
 			unit: "testservice",
 		},
 	}
@@ -173,6 +173,41 @@ func TestReEnable(t *testing.T) {
 			defer cancel()
 
 			res := NewSystemctl().ReEnable(ctx, tt.unit, Options{Mode: ROOT})
+			res.Print()
+		})
+	}
+}
+
+func TestSystemctl_IsActive(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl is-active --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+		{
+			name:  "systemctl is-active --user testservice",
+			unit:  "testservice",
+			runAs: USER,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := NewSystemctl().IsActive(ctx, tt.unit, Options{Mode: tt.runAs})
 			res.Print()
 		})
 	}
