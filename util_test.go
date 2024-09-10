@@ -44,10 +44,10 @@ func Test_execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			res := execute(tt.ctx, tt.args)
 			if debug {
-				fmt.Printf("stdout: %s\n", res.output)
-				fmt.Printf("stderr: %s\n", res.warnings)
-				fmt.Printf("code: %d\n", res.code)
-				fmt.Printf("error: %s\n", res.err)
+				fmt.Printf("stdout: %s\n", res.Output)
+				fmt.Printf("stderr: %s\n", res.Warnings)
+				fmt.Printf("code: %d\n", res.Code)
+				fmt.Printf("error: %s\n", res.Err)
 			}
 		})
 	}

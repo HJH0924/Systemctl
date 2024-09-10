@@ -23,14 +23,21 @@ func init() {
 	systemctl, _ = exec.LookPath("systemctl")
 }
 
-type result struct {
-	output   string
-	warnings string
-	code     int
-	err      error
+type Result struct {
+	Output   string
+	Warnings string
+	Code     int
+	Err      error
 }
 
-func execute(ctx context.Context, args []string) result {
+func (Self *Result) Print() {
+	fmt.Printf("Output: %s\n", Self.Output)
+	fmt.Printf("Warnings: %s\n", Self.Warnings)
+	fmt.Printf("Code: %d\n", Self.Code)
+	fmt.Printf("Err: %v\n", Self.Err)
+}
+
+func execute(ctx context.Context, args []string) Result {
 	var (
 		stdout   bytes.Buffer
 		stderr   bytes.Buffer
@@ -41,9 +48,9 @@ func execute(ctx context.Context, args []string) result {
 	)
 
 	if systemctl == "" {
-		return result{
-			code: 1,
-			err:  ErrNotInstalled,
+		return Result{
+			Code: 1,
+			Err:  ErrNotInstalled,
 		}
 	}
 
@@ -60,10 +67,10 @@ func execute(ctx context.Context, args []string) result {
 		err = fmt.Errorf("received error code %d for stderr `%s`", code, strings.TrimRight(warnings, "\n"))
 	}
 
-	return result{
-		output:   output,
-		warnings: warnings,
-		code:     code,
-		err:      err,
+	return Result{
+		Output:   output,
+		Warnings: warnings,
+		Code:     code,
+		Err:      err,
 	}
 }

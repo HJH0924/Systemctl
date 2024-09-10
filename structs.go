@@ -9,8 +9,15 @@
 
 package Systemctl
 
+type UserMode bool
+
+const (
+	ROOT UserMode = false
+	USER UserMode = true
+)
+
 type Options struct {
-	UserMode bool
+	Mode UserMode
 }
 
 type Unit struct {

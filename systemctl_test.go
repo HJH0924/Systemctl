@@ -18,6 +18,7 @@ import (
 	"time"
 )
 
+// 记录当前执行测试用户的用户名
 var username string
 
 // Testing assumptions
@@ -44,25 +45,25 @@ func TestMain(m *testing.M) {
 }
 
 const (
-	ROOT bool = false
-	USER bool = true
+	RootSkipTest = "skipping user test while running as superuser"
+	UserSkipTest = "skipping superuser test while running as user"
 )
 
 func TestDaemonReload(t *testing.T) {
 	tests := []struct {
 		name  string
 		opts  Options
-		runAs bool
+		runAs UserMode
 	}{
 		/* Run these tests only as a user */
 		{
 			name:  "fail to reload system daemon as user",
-			opts:  Options{UserMode: ROOT},
+			opts:  Options{Mode: ROOT},
 			runAs: USER,
 		},
 		{
 			name:  "reload user's scope daemon",
-			opts:  Options{UserMode: USER},
+			opts:  Options{Mode: USER},
 			runAs: USER,
 		},
 		/* End user tests */
@@ -70,12 +71,12 @@ func TestDaemonReload(t *testing.T) {
 		/* Run these tests only as a superuser */
 		{
 			name:  "succeed to reload daemon",
-			opts:  Options{UserMode: ROOT},
+			opts:  Options{Mode: ROOT},
 			runAs: ROOT,
 		},
 		{
 			name:  "fail to connect to user bus as system",
-			opts:  Options{UserMode: USER},
+			opts:  Options{Mode: USER},
 			runAs: ROOT,
 		},
 		/* End superuser tests */
@@ -83,15 +84,101 @@ func TestDaemonReload(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if (username == "root" || username == "system") && tt.runAs == USER {
-				t.Skip("skipping user test while running as superuser")
-			} else if (username != "root" && username != "system") && tt.runAs == ROOT {
-				t.Skip("skipping superuser test while running as user")
+			if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			} else if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
-			err := DaemonReload(ctx, tt.opts)
-			fmt.Println(err)
+			res := DaemonReload(ctx, tt.opts)
+			res.Print()
 		})
 	}
+}
+
+/* Run these tests only as a superuser */
+func TestDisable(t *testing.T) {
+	tests := []struct {
+		name string
+		unit string
+	}{
+		{
+			name: "systemctl disable --system testservice",
+			unit: "testservice",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) {
+				t.Skip(UserSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := Disable(ctx, tt.unit, Options{Mode: ROOT})
+			res.Print()
+		})
+	}
+}
+
+/* Run these tests only as a superuser */
+func TestEnable(t *testing.T) {
+	tests := []struct {
+		name string
+		unit string
+	}{
+		{
+			name: "systemctl enable --system testservice",
+			unit: "testservice",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) {
+				t.Skip(UserSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := Enable(ctx, tt.unit, Options{Mode: ROOT})
+			res.Print()
+		})
+	}
+}
+
+/* Run these tests only as a superuser */
+func TestReEnable(t *testing.T) {
+	tests := []struct {
+		name string
+		unit string
+	}{
+		{
+			name: "systemctl enable --system testservice",
+			unit: "testservice",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) {
+				t.Skip(UserSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := ReEnable(ctx, tt.unit, Options{Mode: ROOT})
+			res.Print()
+		})
+	}
+}
+
+// isRoot 检查当前执行测试的用户是否是root用户
+func isRoot(username string) bool {
+	return username == "root" || username == "system"
 }
