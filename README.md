@@ -17,9 +17,9 @@
 ## 支持的 systemctl 功能
 
 - [x] `systemctl daemon-reload`
-- [ ] `systemctl disable`
-- [ ] `systemctl enable`
-- [ ] `systemctl reenable`
+- [x] `systemctl disable`
+- [x] `systemctl enable`
+- [x] `systemctl reenable`
 - [ ] `systemctl is-active`
 - [ ] `systemctl is-enabled`
 - [ ] `systemctl is-failed`
