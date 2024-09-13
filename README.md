@@ -24,12 +24,12 @@
 - [x] `systemctl is-active`
 - [x] `systemctl is-enabled`
 - [x] `systemctl is-failed`
-- [ ] `systemctl mask`
-- [ ] `systemctl restart`
 - [ ] `systemctl show`
 - [ ] `systemctl start`
-- [ ] `systemctl status`
+- [ ] `systemctl restart`
 - [ ] `systemctl stop`
+- [ ] `systemctl status`
+- [ ] `systemctl mask`
 - [ ] `systemctl unmask`
 
 
