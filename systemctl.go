@@ -13,6 +13,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -64,6 +65,11 @@ func (Self *Systemctl) Execute(ctx context.Context, args []string) SystemctlResu
 	cmd.Stderr = &stderr
 
 	_ = cmd.Run()
+
+	// log execute cmd
+	cmdStr := Self.systemctl + " " + strings.Join(args, " ")
+	log.Printf("Systemctl Execute: `%s`", cmdStr)
+
 	output = stdout.String()
 	warnings = stderr.String()
 	code = cmd.ProcessState.ExitCode()
@@ -181,6 +187,49 @@ func (Self *Systemctl) IsFailed(ctx context.Context, unit string, opts Options) 
 // properties subpackage to guarantee properties are valid and assist code-completion.
 func (Self *Systemctl) Show(ctx context.Context, unit string, property string, opts Options) SystemctlResult {
 	args := []string{"show", "--system", unit, "--property", property}
+	if opts.Mode == USER {
+		args[1] = "--user"
+	}
+	return Self.Execute(ctx, args)
+}
+
+// Start (activate) a given unit
+func (Self *Systemctl) Start(ctx context.Context, unit string, opts Options) SystemctlResult {
+	args := []string{"start", "--system", unit}
+	if opts.Mode == USER {
+		args[1] = "--user"
+	}
+	return Self.Execute(ctx, args)
+}
+
+// Status
+// Get back the status string which would be returned by running
+// `systemctl status [unit]`.
+//
+// Generally, it makes more sense to programatically retrieve the properties
+// using Show, but this command is provided for the sake of completeness
+func (Self *Systemctl) Status(ctx context.Context, unit string, opts Options) SystemctlResult {
+	args := []string{"status", "--system", unit}
+	if opts.Mode == USER {
+		args[1] = "--user"
+	}
+	return Self.Execute(ctx, args)
+}
+
+// Stop (deactivate) a given unit
+func (Self *Systemctl) Stop(ctx context.Context, unit string, opts Options) SystemctlResult {
+	args := []string{"stop", "--system", unit}
+	if opts.Mode == USER {
+		args[1] = "--user"
+	}
+	return Self.Execute(ctx, args)
+}
+
+// ReStart
+// Stop and then start one or more units specified on the command line.
+// If the units are not running yet, they will be started.
+func (Self *Systemctl) ReStart(ctx context.Context, unit string, opts Options) SystemctlResult {
+	args := []string{"restart", "--system", unit}
 	if opts.Mode == USER {
 		args[1] = "--user"
 	}

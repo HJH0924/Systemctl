@@ -354,6 +354,146 @@ func TestSystemctl_Show(t *testing.T) {
 	}
 }
 
+func TestSystemctl_Start(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl start --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+		{
+			name:  "systemctl start --user testservice",
+			unit:  "testservice",
+			runAs: USER,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := NewSystemctl().Start(ctx, tt.unit, Options{Mode: tt.runAs})
+			res.Print()
+		})
+	}
+}
+
+func TestSystemctl_Status(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl status --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+		{
+			name:  "systemctl status --user testservice",
+			unit:  "testservice",
+			runAs: USER,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := NewSystemctl().Status(ctx, tt.unit, Options{Mode: tt.runAs})
+			res.Print()
+		})
+	}
+}
+
+func TestSystemctl_Stop(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl stop --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+		{
+			name:  "systemctl stop --user testservice",
+			unit:  "testservice",
+			runAs: USER,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := NewSystemctl().Stop(ctx, tt.unit, Options{Mode: tt.runAs})
+			res.Print()
+		})
+	}
+}
+
+func TestSystemctl_ReStart(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl restart --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+		{
+			name:  "systemctl restart --user testservice",
+			unit:  "testservice",
+			runAs: USER,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := NewSystemctl().ReStart(ctx, tt.unit, Options{Mode: tt.runAs})
+			res.Print()
+		})
+	}
+}
+
 // isRoot 检查当前执行测试的用户是否是root用户
 func isRoot(username string) bool {
 	return username == "root" || username == "system"
