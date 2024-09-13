@@ -9,6 +9,8 @@
 
 package Systemctl
 
+import "fmt"
+
 type UserMode bool
 
 const (
@@ -26,6 +28,14 @@ type Unit struct {
 	Active      string
 	Sub         string
 	Description string
+}
+
+func (Self *Unit) Print() {
+	fmt.Println("Name: ", Self.Name)
+	fmt.Println("Load: ", Self.Load)
+	fmt.Println("Active: ", Self.Active)
+	fmt.Println("Sub: ", Self.Sub)
+	fmt.Println("Description: ", Self.Description)
 }
 
 const (

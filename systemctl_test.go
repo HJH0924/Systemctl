@@ -329,7 +329,7 @@ func TestSystemctl_Show(t *testing.T) {
 		runAs UserMode
 	}{
 		{
-			name:  "systemctl show --system testservice --property xxx",
+			name:  "systemctl show --system testservice --property [property]",
 			unit:  "testservice",
 			runAs: ROOT,
 		},
