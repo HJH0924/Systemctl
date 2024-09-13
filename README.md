@@ -24,7 +24,7 @@
 - [x] `systemctl is-active`
 - [x] `systemctl is-enabled`
 - [x] `systemctl is-failed`
-- [ ] `systemctl show`
+- [x] `systemctl show`
 - [ ] `systemctl start`
 - [ ] `systemctl restart`
 - [ ] `systemctl stop`
