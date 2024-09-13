@@ -29,8 +29,8 @@
 - [x] `systemctl status`
 - [x] `systemctl stop`
 - [x] `systemctl restart`
-- [ ] `systemctl mask`
-- [ ] `systemctl unmask`
+- [x] `systemctl mask`
+- [x] `systemctl unmask`
 
 
 
