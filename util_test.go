@@ -126,3 +126,37 @@ func TestIsFailed(t *testing.T) {
 		})
 	}
 }
+
+func TestShow(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl show --system testservice --property xxx",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			systemctl := NewSystemctl()
+			for _, property := range properties {
+				val, err := Show(systemctl, ctx, tt.unit, property, Options{Mode: tt.runAs})
+				fmt.Printf("%s = %s\n", property, val)
+				fmt.Println(err)
+			}
+		})
+	}
+}

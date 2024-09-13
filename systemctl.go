@@ -28,21 +28,21 @@ func NewSystemctl() *Systemctl {
 	}
 }
 
-type Result struct {
+type SystemctlResult struct {
 	Output   string
 	Warnings string
 	Code     int
 	Err      error
 }
 
-func (Self *Result) Print() {
+func (Self *SystemctlResult) Print() {
 	fmt.Printf("Output: %s\n", Self.Output)
 	fmt.Printf("Warnings: %s\n", Self.Warnings)
 	fmt.Printf("Code: %d\n", Self.Code)
 	fmt.Printf("Err: %v\n", Self.Err)
 }
 
-func (Self *Systemctl) Execute(ctx context.Context, args []string) Result {
+func (Self *Systemctl) Execute(ctx context.Context, args []string) SystemctlResult {
 	var (
 		stdout   bytes.Buffer
 		stderr   bytes.Buffer
@@ -53,7 +53,7 @@ func (Self *Systemctl) Execute(ctx context.Context, args []string) Result {
 	)
 
 	if Self.systemctl == "" {
-		return Result{
+		return SystemctlResult{
 			Code: 1,
 			Err:  ErrNotInstalled,
 		}
@@ -72,7 +72,7 @@ func (Self *Systemctl) Execute(ctx context.Context, args []string) Result {
 		err = fmt.Errorf("received error code %d for stderr `%s`", code, strings.TrimRight(warnings, "\n"))
 	}
 
-	return Result{
+	return SystemctlResult{
 		Output:   output,
 		Warnings: warnings,
 		Code:     code,
@@ -86,7 +86,7 @@ func (Self *Systemctl) Execute(ctx context.Context, args []string) Result {
 // This will rerun all generators (see systemd.generator(7)), reload all unit files,
 // and recreate the entire dependency tree. While the daemon is being reloaded,
 // all sockets systemd listens on behalf of user configuration will stay accessible.
-func (Self *Systemctl) DaemonReload(ctx context.Context, opts Options) Result {
+func (Self *Systemctl) DaemonReload(ctx context.Context, opts Options) SystemctlResult {
 	args := []string{"daemon-reload", "--system"}
 	if opts.Mode == USER {
 		args[1] = "--user"
@@ -100,7 +100,7 @@ func (Self *Systemctl) DaemonReload(ctx context.Context, opts Options) Result {
 // This removes all symlinks to the unit files backing the specified units from
 // the unit configuration directory, and hence undoes any changes made by
 // enable or link.
-func (Self *Systemctl) Disable(ctx context.Context, unit string, opts Options) Result {
+func (Self *Systemctl) Disable(ctx context.Context, unit string, opts Options) SystemctlResult {
 	args := []string{"disable", "--system", unit}
 	if opts.Mode == USER {
 		args[1] = "--user"
@@ -114,7 +114,7 @@ func (Self *Systemctl) Disable(ctx context.Context, unit string, opts Options) R
 // the indicated unit files. After the symlinks have been created, the system
 // manager configuration is reloaded (in a way equivalent to daemon-reload),
 // in order to ensure the changes are taken into account immediately.
-func (Self *Systemctl) Enable(ctx context.Context, unit string, opts Options) Result {
+func (Self *Systemctl) Enable(ctx context.Context, unit string, opts Options) SystemctlResult {
 	args := []string{"enable", "--system", unit}
 	if opts.Mode == USER {
 		args[1] = "--user"
@@ -128,7 +128,7 @@ func (Self *Systemctl) Enable(ctx context.Context, unit string, opts Options) Re
 // This removes all symlinks to the unit files backing the specified units from
 // the unit configuration directory, then recreates the symlink to the unit again,
 // atomically. Can be used to change the symlink target.
-func (Self *Systemctl) ReEnable(ctx context.Context, unit string, opts Options) Result {
+func (Self *Systemctl) ReEnable(ctx context.Context, unit string, opts Options) SystemctlResult {
 	args := []string{"reenable", "--system", unit}
 	if opts.Mode == USER {
 		args[1] = "--user"
@@ -141,7 +141,7 @@ func (Self *Systemctl) ReEnable(ctx context.Context, unit string, opts Options) 
 //
 // Returns true if the unit is active, false if inactive or failed.
 // Also returns false in an error case.
-func (Self *Systemctl) IsActive(ctx context.Context, unit string, opts Options) Result {
+func (Self *Systemctl) IsActive(ctx context.Context, unit string, opts Options) SystemctlResult {
 	args := []string{"is-active", "--system", unit}
 	if opts.Mode == USER {
 		args[1] = "--user"
@@ -159,7 +159,7 @@ func (Self *Systemctl) IsActive(ctx context.Context, unit string, opts Options) 
 //
 // See https://www.freedesktop.org/software/systemd/man/systemctl.html#is-enabled%20UNIT%E2%80%A6
 // for more information
-func (Self *Systemctl) IsEnabled(ctx context.Context, unit string, opts Options) Result {
+func (Self *Systemctl) IsEnabled(ctx context.Context, unit string, opts Options) SystemctlResult {
 	args := []string{"is-enabled", "--system", unit}
 	if opts.Mode == USER {
 		args[1] = "--user"
@@ -169,8 +169,18 @@ func (Self *Systemctl) IsEnabled(ctx context.Context, unit string, opts Options)
 
 // IsFailed
 // Check whether any of the specified units are in a "failed" state.
-func (Self *Systemctl) IsFailed(ctx context.Context, unit string, opts Options) Result {
+func (Self *Systemctl) IsFailed(ctx context.Context, unit string, opts Options) SystemctlResult {
 	args := []string{"is-failed", "--system", unit}
+	if opts.Mode == USER {
+		args[1] = "--user"
+	}
+	return Self.Execute(ctx, args)
+}
+
+// Show a selected property of a unit. Accepted properties are predefined in the
+// properties subpackage to guarantee properties are valid and assist code-completion.
+func (Self *Systemctl) Show(ctx context.Context, unit string, property string, opts Options) SystemctlResult {
+	args := []string{"show", "--system", unit, "--property", property}
 	if opts.Mode == USER {
 		args[1] = "--user"
 	}

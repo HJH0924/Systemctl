@@ -322,6 +322,38 @@ func TestSystemctl_IsFailed(t *testing.T) {
 	}
 }
 
+func TestSystemctl_Show(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl show --system testservice --property xxx",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			for _, property := range properties {
+				res := NewSystemctl().Show(ctx, tt.unit, property, Options{Mode: tt.runAs})
+				res.Print()
+			}
+		})
+	}
+}
+
 // isRoot 检查当前执行测试的用户是否是root用户
 func isRoot(username string) bool {
 	return username == "root" || username == "system"

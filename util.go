@@ -55,3 +55,11 @@ func IsFailed(systemctl *Systemctl, ctx context.Context, unit string, opts Optio
 		return false, res.Err
 	}
 }
+
+func Show(systemctl *Systemctl, ctx context.Context, unit string, property string, opts Options) (string, error) {
+	res := systemctl.Show(ctx, unit, property, opts)
+	val := res.Output
+	val = strings.TrimPrefix(val, property+"=")
+	val = strings.TrimSuffix(val, "\n")
+	return val, res.Err
+}
