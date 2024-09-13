@@ -89,3 +89,40 @@ func TestIsEnabled(t *testing.T) {
 		})
 	}
 }
+
+func TestIsFailed(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl is-failed --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+		{
+			name:  "systemctl is-failed --user testservice",
+			unit:  "testservice",
+			runAs: USER,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			systemctl := NewSystemctl()
+			isFailed, err := IsFailed(systemctl, ctx, tt.unit, Options{Mode: tt.runAs})
+			fmt.Println(isFailed)
+			fmt.Println(err)
+		})
+	}
+}

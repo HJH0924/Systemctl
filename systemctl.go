@@ -166,3 +166,13 @@ func (Self *Systemctl) IsEnabled(ctx context.Context, unit string, opts Options)
 	}
 	return Self.Execute(ctx, args)
 }
+
+// IsFailed
+// Check whether any of the specified units are in a "failed" state.
+func (Self *Systemctl) IsFailed(ctx context.Context, unit string, opts Options) Result {
+	args := []string{"is-failed", "--system", unit}
+	if opts.Mode == USER {
+		args[1] = "--user"
+	}
+	return Self.Execute(ctx, args)
+}

@@ -11,6 +11,7 @@ package Systemctl
 
 import (
 	"context"
+	"regexp"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ func IsActive(systemctl *Systemctl, ctx context.Context, unit string, opts Optio
 }
 
 func IsEnabled(systemctl *Systemctl, ctx context.Context, unit string, opts Options) (bool, error) {
-	res := systemctl.IsActive(ctx, unit, opts)
+	res := systemctl.IsEnabled(ctx, unit, opts)
 	status := strings.TrimSuffix(res.Output, "\n")
 	switch status {
 	case "enabled", "enabled-runtime", "alias", "static", "indirect", "generated", "transient":
@@ -37,6 +38,20 @@ func IsEnabled(systemctl *Systemctl, ctx context.Context, unit string, opts Opti
 		return false, nil
 	default:
 		// "linked", "linked-runtime", "masked", "masked-runtime", etc
+		return false, res.Err
+	}
+}
+
+func IsFailed(systemctl *Systemctl, ctx context.Context, unit string, opts Options) (bool, error) {
+	res := systemctl.IsFailed(ctx, unit, opts)
+
+	if matched, _ := regexp.MatchString(`inactive`, res.Output); matched {
+		return false, nil
+	} else if matched, _ := regexp.MatchString(`active`, res.Output); matched {
+		return false, nil
+	} else if matched, _ := regexp.MatchString(`failed`, res.Output); matched {
+		return true, nil
+	} else {
 		return false, res.Err
 	}
 }
