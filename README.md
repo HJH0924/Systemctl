@@ -22,7 +22,7 @@
 - [x] `systemctl enable`
 - [x] `systemctl reenable`
 - [x] `systemctl is-active`
-- [ ] `systemctl is-enabled`
+- [x] `systemctl is-enabled`
 - [ ] `systemctl is-failed`
 - [ ] `systemctl mask`
 - [ ] `systemctl restart`
