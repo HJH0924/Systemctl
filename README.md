@@ -25,10 +25,10 @@
 - [x] `systemctl is-enabled`
 - [x] `systemctl is-failed`
 - [x] `systemctl show`
-- [ ] `systemctl start`
-- [ ] `systemctl restart`
-- [ ] `systemctl stop`
-- [ ] `systemctl status`
+- [x] `systemctl start`
+- [x] `systemctl status`
+- [x] `systemctl stop`
+- [x] `systemctl restart`
 - [ ] `systemctl mask`
 - [ ] `systemctl unmask`
 
