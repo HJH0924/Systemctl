@@ -15,7 +15,7 @@
 
 
 
-## 支持的 systemctl 功能
+## 当前支持的 systemctl 功能
 
 - [x] `systemctl daemon-reload`
 - [x] `systemctl disable`
@@ -32,14 +32,25 @@
 - [x] `systemctl mask`
 - [x] `systemctl unmask`
 
+...
 
 
-## 辅助功能
 
-- [ ] 获取服务的启动时间（`ExecMainStartTimestamp`）作为 `Time` 类型
-- [ ] 获取当前内存（`MemoryCurrent`）作为 int
-- [ ] 获取主进程的 PID（`MainPID`）作为 int
-- [ ] 获取单元的重启次数（`NRestarts`）作为 int
+## 当前支持的辅助功能
+
+- [x] **检查服务是否激活** `IsActive`：确定指定的服务是否处于激活状态。
+- [x] **检查服务是否启用** `IsEnabled`：检查服务是否设置为在系统启动时自动启动。
+- [x] **检查服务是否失败** `IsFailed`：检查服务是否启动失败。
+- [x] **获取服务启动时间** `GetStartTime`：获取服务的启动时间。
+- [x] **获取服务重启次数** `GetUnitRestartCount`：获取服务重启的次数。
+- [x] **获取服务内存使用量** `GetMemoryUsage`：获取服务当前的内存使用量。
+- [x] **获取主进程 PID** `GetMainPID`：获取服务主进程的进程 ID。
+- [x] **列出所有单元** `GetAllUnits`：获取所有 systemd 单元的列表及其状态和描述。
+- [x] **列出所有已屏蔽单元** `GetAllMaskedUnits`：获取所有被屏蔽（不允许启动）的 systemd 单元列表。
+- [x] **检查单元是否已屏蔽** `IsMasked`：检查指定单元是否被屏蔽。
+- [x] **检查服务是否正在运行** `IsRunning`：检查服务是否正在运行。
+
+...
 
 
 
@@ -49,17 +60,56 @@
 
 
 
+
 ## 上下文支持
 
 这个库的所有调用都支持 Go 的 `context` 功能。
-因此，阻塞调用可以根据调用者的需要超时，返回的错误应该检查是否发生了超时（`ErrExecTimeout`）。
 
 
 
-## 简单示例
+## 安装
+
+你可以通过以下命令来安装 Systemctl Go 库：
+
+```sh
+go get github.com/HJH0924/Systemctl
+```
+
+
+
+## 如何使用
+
+要使用 Systemctl Go 库，请按照以下步骤操作：
+
+1. 导入库到你的 Go 项目中。
+```go
+import "github.com/HJH0924/Systemctl"
+```
+2. 使用库中的功能函数来执行系统服务管理任务。
+
+例如，要检查服务是否激活，你可以使用 `IsActive` 函数：
 
 ```go
-// 示例代码
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/HJH0924/Systemctl"
+)
+
+func main() {
+	ctx := context.Background()
+	systemctl := Systemctl.NewSystemctl()
+	res := systemctl.Start(ctx, "testservice", Systemctl.Options{Mode: Systemctl.USER})
+	active, err := Systemctl.IsActive(systemctl, ctx, "testservice", Systemctl.Options{Mode: Systemctl.USER})
+	if err != nil {
+		fmt.Println("检查服务状态出错:", err)
+		return
+	}
+	fmt.Printf("testservice 是否处于活动状态？%v\n", active)
+}
 ```
 
 
@@ -69,10 +119,11 @@
 运行测试用例之前，您需要在您的系统上安装 `testservice.service`
 
 ```shell
-sudo cp Systemctl/testservice.service /etc/systemd/system
-sudo systemctl daemon-reload
+# 以 root 用户身份运行测试
+sudo make install-root
+# 以普通用户身份运行测试
+sudo make install-user
 ```
-
 
 
 为了全面测试这个库，您需要以root用户和普通用户身份运行测试，因为`systemctl`可能需要root权限来执行某些操作。以下是一些建议：
@@ -81,7 +132,7 @@ sudo systemctl daemon-reload
 
     ```shell
     sudo su root # 切换 root 用户
-    /usr/local/go/bin/go test -run TestDaemonReload # 以 root 身份运行 TestDaemonReload 测试用例
+    go test -run TestDaemonReload # 以 root 身份运行 TestDaemonReload 测试用例
     ```
 
 2.  **以普通用户身份运行测试**：其他测试应该以普通用户身份运行，以确保库在没有提升权限的情况下也能正常工作。
@@ -89,3 +140,9 @@ sudo systemctl daemon-reload
     ```shell
     go test -run TestDaemonReload
     ```
+
+
+
+## 贡献
+
+欢迎任何形式的贡献！如果你有任何问题、建议或想要提交代码，请随时创建 issue 或提交 pull request。
