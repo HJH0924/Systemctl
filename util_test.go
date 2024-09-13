@@ -13,43 +13,79 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 )
 
-var debug = true // for debug, printf stdout, stderr
-
-func Test_execute(t *testing.T) {
+func TestIsActive(t *testing.T) {
 	tests := []struct {
-		name string
-		ctx  context.Context
-		args []string
+		name  string
+		unit  string
+		runAs UserMode
 	}{
 		{
-			name: "systemctl command success",
-			ctx:  context.Background(),
-			args: []string{"status", "ssh"},
+			name:  "systemctl is-active --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
 		},
 		{
-			name: "Unit qwe.service could not be found.",
-			ctx:  context.Background(),
-			args: []string{"status", "qwe"},
-		},
-		{
-			name: "systemctl daemon-reload --user",
-			ctx:  context.Background(),
-			args: []string{"daemon-reload", "--user"},
+			name:  "systemctl is-active --user testservice",
+			unit:  "testservice",
+			runAs: USER,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			systemctl := NewSystemctl()
-			res := systemctl.Execute(tt.ctx, tt.args)
-			if debug {
-				fmt.Printf("stdout: %s\n", res.Output)
-				fmt.Printf("stderr: %s\n", res.Warnings)
-				fmt.Printf("code: %d\n", res.Code)
-				fmt.Printf("error: %s\n", res.Err)
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
 			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			systemctl := NewSystemctl()
+			isActive, err := IsActive(systemctl, ctx, tt.unit, Options{Mode: tt.runAs})
+			fmt.Println(isActive)
+			fmt.Println(err)
+		})
+	}
+}
+
+func TestIsEnabled(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl is-enabled --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+		{
+			name:  "systemctl is-enabled --user testservice",
+			unit:  "testservice",
+			runAs: USER,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			systemctl := NewSystemctl()
+			isEnabled, err := IsEnabled(systemctl, ctx, tt.unit, Options{Mode: tt.runAs})
+			fmt.Println(isEnabled)
+			fmt.Println(err)
 		})
 	}
 }

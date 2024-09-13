@@ -18,6 +18,45 @@ import (
 	"time"
 )
 
+var debug = true // for debug, printf stdout, stderr
+
+func Test_execute(t *testing.T) {
+	tests := []struct {
+		name string
+		ctx  context.Context
+		args []string
+	}{
+		{
+			name: "systemctl command success",
+			ctx:  context.Background(),
+			args: []string{"status", "ssh"},
+		},
+		{
+			name: "Unit qwe.service could not be found.",
+			ctx:  context.Background(),
+			args: []string{"status", "qwe"},
+		},
+		{
+			name: "systemctl daemon-reload --user",
+			ctx:  context.Background(),
+			args: []string{"daemon-reload", "--user"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			systemctl := NewSystemctl()
+			res := systemctl.Execute(tt.ctx, tt.args)
+			if debug {
+				fmt.Printf("stdout: %s\n", res.Output)
+				fmt.Printf("stderr: %s\n", res.Warnings)
+				fmt.Printf("code: %d\n", res.Code)
+				fmt.Printf("error: %s\n", res.Err)
+			}
+		})
+	}
+}
+
 // 记录当前执行测试用户的用户名
 var username string
 
@@ -208,6 +247,41 @@ func TestSystemctl_IsActive(t *testing.T) {
 			defer cancel()
 
 			res := NewSystemctl().IsActive(ctx, tt.unit, Options{Mode: tt.runAs})
+			res.Print()
+		})
+	}
+}
+
+func TestSystemctl_IsEnabled(t *testing.T) {
+	tests := []struct {
+		name  string
+		unit  string
+		runAs UserMode
+	}{
+		{
+			name:  "systemctl is-enabled --system testservice",
+			unit:  "testservice",
+			runAs: ROOT,
+		},
+		{
+			name:  "systemctl is-enabled --user testservice",
+			unit:  "testservice",
+			runAs: USER,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !isRoot(username) && tt.runAs == ROOT {
+				t.Skip(UserSkipTest)
+			} else if isRoot(username) && tt.runAs == USER {
+				t.Skip(RootSkipTest)
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			res := NewSystemctl().IsEnabled(ctx, tt.unit, Options{Mode: tt.runAs})
 			res.Print()
 		})
 	}
